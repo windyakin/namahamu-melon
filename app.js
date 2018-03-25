@@ -8,6 +8,10 @@ const Namahamu = require('./modules/namahamu.js');
 
 app.use(morgan('combined'));
 
+app.get('/', (req, res) => {
+  res.send('Namahamu Melon');
+});
+
 app.get('/melon/:id', async (req, res) => {
   const bookId = req.params.id;
   const melon = await new Melon();
