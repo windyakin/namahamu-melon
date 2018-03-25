@@ -16,7 +16,7 @@ app.get('/melon/:id', async (req, res) => {
     const book = new Namahamu(values);
     res.json(book);
   } catch (e) {
-    console.error(e);
+    throw e;
   } finally {
     await melon.close();
   }
