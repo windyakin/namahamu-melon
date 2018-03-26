@@ -1,9 +1,9 @@
 const express = require('express');
 const morgan = require('morgan');
+const Melon = require('./modules/melon.js');
 
 const app = express();
-
-const Melon = require('./modules/melon.js');
+let melon = null;
 
 app.use(morgan('combined'));
 
@@ -12,7 +12,6 @@ app.get('/', (req, res) => {
 });
 
 app.get('/melon/:id', async (req, res) => {
-  const melon = await new Melon();
   try {
     const book = await melon.getNamahamu(req.params.id);
     res.json(book);
@@ -23,4 +22,7 @@ app.get('/melon/:id', async (req, res) => {
   }
 });
 
-app.listen(3000);
+(async () => {
+  melon = await new Melon();
+  app.listen(3000);
+})();
