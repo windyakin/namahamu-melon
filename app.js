@@ -34,9 +34,9 @@ app.get('/melon/:id', async (req, res) => {
 })();
 
 // NOTE: Graceful exit
-process.on('SIGINT', async () => {
+['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, async () => {
   await server.close(async () => {
     await melon.close();
     process.exit();
   });
-});
+}));
