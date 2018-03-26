@@ -6,7 +6,7 @@ const Namahamu = require('./namahamu.js');
 module.exports = class Melon {
   constructor() {
     return new Promise((resolve, reject) => {
-      const options = { headless: false };
+      const options = {};
       if (process.env.CHROME_EXECUTE_PATH) {
         options.executablePath = process.env.CHROME_EXECUTE_PATH;
       }
@@ -26,26 +26,25 @@ module.exports = class Melon {
 
   async scrapeNamahamuData(namahamuId) {
     const page = await this.browser.newPage();
-    const [response] = await Promise.all([
-      page.goto(`${Melon.baseUrl()}${namahamuId}`),
-      page.waitForNavigation(),
-    ]);
-
-    if (response.status() === 404) {
-      throw new Error('NotFound');
-    }
-
-    if (await Melon.isUnderagePage(page)) {
-      await Melon.throughUnderage(page);
-    }
-
     try {
+      const [response] = await Promise.all([
+        page.goto(`${Melon.baseUrl()}${namahamuId}`),
+        page.waitForNavigation(),
+      ]);
+
+      if (response.status() === 404) {
+        throw new Error('NotFound');
+      }
+
+      if (await Melon.isUnderagePage(page)) {
+        await Melon.throughUnderage(page);
+      }
+
       const rows = await Melon.getAttributesContent(page);
 
       const values = await Promise.all(rows.map(async (row) => {
-        const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
-        const value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
-        return { key, value };
+        const object = await Melon.convertKeyValuePair(row);
+        return object;
       }));
       return values;
     } catch (e) {
@@ -53,6 +52,12 @@ module.exports = class Melon {
     } finally {
       await page.close();
     }
+  }
+
+  static async convertKeyValuePair(row) {
+    const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
+    const value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
+    return { key, value };
   }
 
   static async getAttributesContent(page) {
