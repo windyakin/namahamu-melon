@@ -17,9 +17,14 @@ app.get('/melon/:id', async (req, res) => {
     const book = await melon.getNamahamu(req.params.id);
     res.json(book);
   } catch (e) {
-    throw e;
-  } finally {
-    await melon.close();
+    switch (e.message) {
+      case 'NotFound':
+        res.status(404).json({ statusCode: 404 });
+        break;
+      default:
+        res.status(500).json({ statusCode: 500 });
+        break;
+    }
   }
 });
 

@@ -6,7 +6,7 @@ const Namahamu = require('./namahamu.js');
 module.exports = class Melon {
   constructor() {
     return new Promise((resolve, reject) => {
-      const options = {};
+      const options = { headless: false };
       if (process.env.CHROME_EXECUTE_PATH) {
         options.executablePath = process.env.CHROME_EXECUTE_PATH;
       }
@@ -26,27 +26,44 @@ module.exports = class Melon {
 
   async scrapeNamahamuData(namahamuId) {
     const page = await this.browser.newPage();
-    await page.goto(`${Melon.baseUrl()}${namahamuId}`);
+    const [response] = await Promise.all([
+      page.goto(`${Melon.baseUrl()}${namahamuId}`),
+      page.waitForNavigation(),
+    ]);
 
-    const isUnderage = await Melon.isUnderagePage(page);
+    if (response.status() === 404) {
+      throw new Error('NotFound');
+    }
 
-    if (isUnderage) {
+    if (await Melon.isUnderagePage(page)) {
       await Melon.throughUnderage(page);
     }
 
-    const description = await page.$('#description');
-    const table = await description.$('table');
-    const rows = await table.$$('tr');
+    try {
+      const rows = await Melon.getAttributesContent(page);
 
-    const values = await Promise.all(rows.map(async (row) => {
-      const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
-      const value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
-      return { key, value };
-    }));
+      const values = await Promise.all(rows.map(async (row) => {
+        const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
+        const value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
+        return { key, value };
+      }));
+      return values;
+    } catch (e) {
+      throw e;
+    } finally {
+      await page.close();
+    }
+  }
 
-    await page.close();
-
-    return values;
+  static async getAttributesContent(page) {
+    try {
+      const description = await page.$('#description');
+      const table = await description.$('table');
+      const rows = await table.$$('tr');
+      return rows;
+    } catch (e) {
+      throw e;
+    }
   }
 
   static async isUnderagePage(page) {
@@ -56,8 +73,8 @@ module.exports = class Melon {
 
   static async throughUnderage(page) {
     await Promise.all([
-      page.click('.f_left.yes'),
       page.waitForNavigation(),
+      page.click('.f_left.yes'),
     ]);
   }
 
