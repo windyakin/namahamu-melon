@@ -4,7 +4,11 @@ const Puppeteer = require('puppeteer');
 module.exports = class Melon {
   constructor() {
     return new Promise((resolve, reject) => {
-      Puppeteer.launch()
+      const options = {};
+      if (process.env.CHROME_EXECUTE_PATH) {
+        options.executablePath = process.env.CHROME_EXECUTE_PATH;
+      }
+      Puppeteer.launch(options)
         .then((browser) => {
           this.browser = browser;
           resolve(this);
