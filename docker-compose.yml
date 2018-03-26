@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  namahamu-melon:
+    image: namahamu-melon
+    build: .
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - 3000:3000
+    environment:
+      - CHROME_EXECUTE_PATH=google-chrome-unstable
