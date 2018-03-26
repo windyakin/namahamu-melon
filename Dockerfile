@@ -12,11 +12,6 @@ RUN apt-get install -y --no-install-recommends \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
       google-chrome-unstable \
-      fonts-ipafont-gothic \
-      fonts-wqy-zenhei \
-      fonts-thai-tlwg \
-      fonts-kacst \
-      ttf-freefont \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
     && apt-get purge --auto-remove -y curl \
     && rm -rf /src/*.deb
