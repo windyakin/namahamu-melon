@@ -15,7 +15,7 @@ module.exports = class Namahamu {
           this.genres = Namahamu.splitGenres(obj.value);
           break;
         case '発行日':
-          this.tags = obj.value;
+          this.publishDate = obj.value;
           break;
         case '版型・メディア':
           this.bookSize = obj.value;
