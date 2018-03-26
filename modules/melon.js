@@ -1,6 +1,8 @@
 const Promise = require('bluebird');
 const Puppeteer = require('puppeteer');
 
+const Namahamu = require('./namahamu.js');
+
 module.exports = class Melon {
   constructor() {
     return new Promise((resolve, reject) => {
@@ -18,9 +20,13 @@ module.exports = class Melon {
     });
   }
 
-  async getBookAttributes(bookId) {
+  async getNamahamu(namahamuId) {
+    return new Namahamu(await this.scrapeNamahamuData(namahamuId));
+  }
+
+  async scrapeNamahamuData(namahamuId) {
     const page = await this.browser.newPage();
-    await page.goto(`${Melon.baseUrl()}${bookId}`);
+    await page.goto(`${Melon.baseUrl()}${namahamuId}`);
 
     const isUnderage = await Melon.isUnderagePage(page);
 
@@ -37,6 +43,8 @@ module.exports = class Melon {
       const value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
       return { key, value };
     }));
+
+    await page.close();
 
     return values;
   }
