@@ -4,6 +4,7 @@ const Melon = require('./modules/melon.js');
 
 const app = express();
 let melon = null;
+let server = null;
 
 app.use(morgan('combined'));
 
@@ -24,5 +25,13 @@ app.get('/melon/:id', async (req, res) => {
 
 (async () => {
   melon = await new Melon();
-  app.listen(3000);
+  server = app.listen(3000);
 })();
+
+// NOTE: Graceful exit
+process.on('SIGINT', async () => {
+  await server.close(async () => {
+    await melon.close();
+    process.exit();
+  });
+});
