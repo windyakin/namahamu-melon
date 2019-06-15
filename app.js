@@ -10,6 +10,7 @@ let server = null;
 
 app.use(helmet());
 app.use(morgan('combined'));
+app.disable('x-powered-by');
 
 app.get('/', (req, res) => {
   res.send('Namahamu Melon');
