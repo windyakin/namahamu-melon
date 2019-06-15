@@ -1,12 +1,16 @@
 const express = require('express');
 const morgan = require('morgan');
+const helmet = require('helmet');
+
 const Melon = require('./modules/melon.js');
 
 const app = express();
 let melon = null;
 let server = null;
 
+app.use(helmet());
 app.use(morgan('combined'));
+app.disable('x-powered-by');
 
 app.get('/', (req, res) => {
   res.send('Namahamu Melon');
