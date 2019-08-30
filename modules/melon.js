@@ -58,7 +58,7 @@ module.exports = class Melon {
     const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
     let value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
     if (key === 'サークル名' || key === '作家名') {
-      value = value.replace(/^(.+)\nお気に入り(サークル|作家)に登録する$/, '$1');
+      value = value.replace(/^(.+)\nお気に入り(サークル|作家)に登録する\n?/, '$1');
     }
     return { key, value };
   }
