@@ -5,16 +5,18 @@ RUN apt-get update \
   && apt-get install -y libgconf-2-4 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-RUN apt-get install -y --no-install-recommends \
-      wget \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-      google-chrome-unstable \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-    && apt-get purge --auto-remove -y curl \
-    && rm -rf /src/*.deb
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    wget \
+    gnupg \
+    ca-certificates \
+  && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+    google-chrome-unstable \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+  && rm -rf /src/*.deb
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 

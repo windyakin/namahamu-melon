@@ -47,8 +47,6 @@ module.exports = class Melon {
         return object;
       }));
       return values;
-    } catch (e) {
-      throw e;
     } finally {
       await page.close();
     }
@@ -57,21 +55,19 @@ module.exports = class Melon {
   static async convertKeyValuePair(row) {
     const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
     let value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
-    if (key === 'サークル名' || key === '作家名') {
-      value = value.replace(/^(.+)\nお気に入り(サークル|作家)に登録する\n?/, '$1');
+    if (key === 'サークル名') {
+      value = value.replace(/^(.+)\u00a0\(作品数:\d+\)\nお気に入りサークルに追加$/, '$1');
+    } else if (key === '作家名') {
+      value = value.replace(/^(.+)\nお気に入り作家に登録する\n?/, '$1');
     }
     return { key, value };
   }
 
   static async getAttributesContent(page) {
-    try {
-      const description = await page.$('#description');
-      const table = await description.$('table');
-      const rows = await table.$$('tr');
-      return rows;
-    } catch (e) {
-      throw e;
-    }
+    const description = await page.$('#description');
+    const table = await description.$('table');
+    const rows = await table.$$('tr');
+    return rows;
   }
 
   static async isUnderagePage(page) {
