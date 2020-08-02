@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "dev": "nodemon -L --inspect=0.0.0.0:9229 app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "windyakin",
@@ -12,7 +13,8 @@
   "devDependencies": {
     "eslint": "^6.4.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2"
+    "eslint-plugin-import": "^2.18.2",
+    "nodemon": "^2.0.4"
   },
   "dependencies": {
     "bluebird": "^3.5.5",

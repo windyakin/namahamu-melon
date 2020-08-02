@@ -1,0 +1,14 @@
+version: '3'
+
+volumes:
+  node_modules: {}
+
+services:
+  namahamu-melon:
+    command: 'npm run dev'
+    volumes:
+      - node_modules:/usr/src/app/node_modules
+      - ./modules:/usr/src/app/modules:ro
+  nginx:
+    ports:
+      - 8080:80
