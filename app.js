@@ -2,9 +2,11 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 
+const ScrapeDriver = require('./modules/scrapeDriver.js');
 const Melon = require('./modules/melon.js');
 
 const app = express();
+let scrapeDriver = null;
 let melon = null;
 let server = null;
 
@@ -26,6 +28,7 @@ app.get('/melon/:id', async (req, res) => {
         res.status(404).json({ statusCode: 404 });
         break;
       default:
+        console.error(e);
         res.status(500).json({ statusCode: 500 });
         break;
     }
@@ -33,17 +36,16 @@ app.get('/melon/:id', async (req, res) => {
 });
 
 (async () => {
-  melon = await new Melon();
+  scrapeDriver = await new ScrapeDriver();
+  melon = new Melon(scrapeDriver);
   server = app.listen(3000);
 })();
 
 // NOTE: Graceful exit
-['SIGINT', 'SIGTERM'].forEach(signal => process.on(signal, async () => {
+['SIGINT', 'SIGTERM'].forEach((signal) => process.on(signal, async () => {
   await server.close(async () => {
     try {
-      await melon.close();
-    } catch (e) {
-      throw e;
+      await scrapeDriver.close();
     } finally {
       process.exit();
     }

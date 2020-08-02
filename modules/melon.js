@@ -4,20 +4,8 @@ const Puppeteer = require('puppeteer');
 const Namahamu = require('./namahamu.js');
 
 module.exports = class Melon {
-  constructor() {
-    return new Promise((resolve, reject) => {
-      const options = {};
-      if (process.env.CHROME_EXECUTE_PATH) {
-        options.executablePath = process.env.CHROME_EXECUTE_PATH;
-      }
-      Puppeteer.launch(options)
-        .then((browser) => {
-          this.browser = browser;
-          resolve(this);
-        }).catch((e) => {
-          reject(e);
-        });
-    });
+  constructor(scrapeDriver) {
+    this.driver = scrapeDriver.driver;
   }
 
   async getNamahamu(namahamuId) {
@@ -25,7 +13,25 @@ module.exports = class Melon {
   }
 
   async scrapeNamahamuData(namahamuId) {
-    const page = await this.browser.newPage();
+    const page = await this.getPage(namahamuId);
+    try {
+      const rows = await Melon.getAttributesContent(page);
+
+      const values = await Promise.all(rows.map(async (row) => {
+        const object = await Melon.convertKeyValuePair(row);
+        return object;
+      }));
+      return values;
+    } catch(err) {
+      throw err
+    }
+    finally {
+      await page.close();
+    }
+  }
+
+  async getPage(namahamuId) {
+    const page = await this.driver.newPage();
     try {
       const [response] = await Promise.all([
         page.goto(`${Melon.baseUrl()}${namahamuId}`),
@@ -39,17 +45,10 @@ module.exports = class Melon {
       if (await Melon.isUnderagePage(page)) {
         await Melon.throughUnderage(page);
       }
-
-      const rows = await Melon.getAttributesContent(page);
-
-      const values = await Promise.all(rows.map(async (row) => {
-        const object = await Melon.convertKeyValuePair(row);
-        return object;
-      }));
-      return values;
-    } finally {
-      await page.close();
+    } catch (err) {
+      throw err
     }
+    return page;
   }
 
   static async convertKeyValuePair(row) {
@@ -88,6 +87,6 @@ module.exports = class Melon {
   }
 
   async close() {
-    await this.browser.close();
+    await this.driver.close();
   }
 };
