@@ -1,5 +1,4 @@
 const Promise = require('bluebird');
-const Puppeteer = require('puppeteer');
 
 const Namahamu = require('./namahamu.js');
 
@@ -15,51 +14,82 @@ module.exports = class Melon {
   async scrapeNamahamuData(namahamuId) {
     const page = await this.getPage(namahamuId);
     try {
-      const rows = await Melon.getAttributesContent(page);
+      const rows = await this.constructor.getAttributesContent(page);
 
-      const values = await Promise.all(rows.map(async (row) => {
-        const object = await Melon.convertKeyValuePair(row);
-        return object;
-      }));
+      const values = Object.fromEntries(
+        await Promise.all(rows.map(async (row) => {
+          const object = await this.constructor.convertKeyValuePair(row);
+          return object;
+        })).filter((v) => v),
+      );
       return values;
-    } catch(err) {
-      throw err
-    }
-    finally {
+    } finally {
       await page.close();
     }
   }
 
   async getPage(namahamuId) {
     const page = await this.driver.newPage();
-    try {
-      const [response] = await Promise.all([
-        page.goto(`${Melon.baseUrl()}${namahamuId}`),
-        page.waitForNavigation(),
-      ]);
+    const [response] = await Promise.all([
+      page.goto(`${this.constructor.baseUrl()}${namahamuId}`),
+      page.waitForNavigation(),
+    ]);
 
-      if (response.status() === 404) {
-        throw new Error('NotFound');
-      }
+    if (response.status() === 404) {
+      throw new Error('NotFound');
+    }
 
-      if (await Melon.isUnderagePage(page)) {
-        await Melon.throughUnderage(page);
-      }
-    } catch (err) {
-      throw err
+    if (await this.constructor.isUnderagePage(page)) {
+      await this.constructor.throughUnderage(page);
     }
     return page;
   }
 
   static async convertKeyValuePair(row) {
     const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
-    let value = (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim();
-    if (key === 'サークル名') {
-      value = value.replace(/^(.+)\u00a0\(作品数:\d+\)\nお気に入りサークルに追加$/, '$1');
-    } else if (key === '作家名') {
-      value = value.replace(/^(.+)\nお気に入り作家に登録する\n?/, '$1');
+    switch (key) {
+      case 'タイトル':
+        return [
+          'bookTitle',
+          (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim(),
+        ];
+      case 'サークル名':
+        return [
+          'circleName',
+          (await (await (await row.$('td > a')).getProperty('innerText')).jsonValue()).replace(/^(.+)\u00a0\(作品数:\d+\)/, '$1').trim(),
+        ];
+      case '作家名': {
+        const artistNames = await Promise.all((await row.$$('td > a')).map(async (link) => {
+          const name = (await (await link.getProperty('innerText')).jsonValue()).trim();
+          if (name === '他') return null;
+          return name;
+        })).filter((v) => v);
+        return ['artistNames', artistNames];
+      }
+      case 'ジャンル': {
+        const genres = await Promise.all((await row.$$('td > a')).map(async (link) => {
+          return (await (await link.getProperty('innerText')).jsonValue()).trim();
+        })).filter((v) => v);
+        return ['genres', genres];
+      }
+      case '発行日':
+        return [
+          'publishDate',
+          (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim(),
+        ];
+      case '版型・メディア':
+        return [
+          'bookSize',
+          (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim(),
+        ];
+      case '総ページ数・CG数・曲数':
+        return [
+          'pageNumber',
+          parseInt((await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim(), 10),
+        ];
+      default:
+        return null;
     }
-    return { key, value };
   }
 
   static async getAttributesContent(page) {
