@@ -1,4 +1,4 @@
-FROM node:10-slim
+FROM node:12-slim
 
 # NOTE: See https://crbug.com/795759
 RUN apt-get update \
