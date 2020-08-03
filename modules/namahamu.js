@@ -1,40 +1,22 @@
 module.exports = class Namahamu {
-  constructor(hash) {
-    hash.forEach((obj) => {
-      switch (obj.key) {
-        case 'タイトル':
-          this.bookTitle = obj.value;
-          break;
-        case 'サークル名':
-          this.circleName = obj.value;
-          break;
-        case '作家名':
-          this.artistNames = Namahamu.splitArtistNames(obj.value);
-          break;
-        case 'ジャンル':
-          this.genres = Namahamu.splitGenres(obj.value);
-          break;
-        case '発行日':
-          this.publishDate = obj.value;
-          break;
-        case '版型・メディア':
-          this.bookSize = obj.value;
-          break;
-        case '総ページ数・CG数・曲数':
-          this.pageNumber = parseInt(obj.value, 10);
-          break;
-        default:
-          break;
-      }
-    });
-    return this;
+  constructor(obj) {
+    this.namahamu = obj;
+    return this.namahamu;
   }
 
-  static splitArtistNames(names) {
-    return names.split('\n\n').filter(value => (value !== '他'));
+  get namahamu() {
+    return this.instance;
   }
 
-  static splitGenres(genres) {
-    return genres.split(' , ');
+  set namahamu(obj) {
+    this.instance = {
+      bookTitle: obj.bookTitle || null,
+      circleName: obj.circleName || null,
+      artistNames: obj.artistNames || [],
+      genres: obj.genres || [],
+      publishDate: obj.publishDate || '1970/01/01',
+      bookSize: obj.bookSize || null,
+      pageNumber: obj.pageNumber || 0,
+    };
   }
 };
