@@ -56,12 +56,12 @@ module.exports = class Tiger {
 
     let artistNames = [];
     if (Object.prototype.hasOwnProperty.call(entries, '作家')) {
-      artistNames = await Promise.all((await entries['作家'].$$('td:nth-child(2) > span > a')).map(async (item) => (await (await item.getProperty('innerText')).jsonValue()).trim()))
+      artistNames = await Promise.all((await entries['作家'].$$('td:nth-child(2) > span > a')).map(async (item) => (await (await item.getProperty('innerText')).jsonValue()).trim()));
     }
 
     let genres = [];
     if (Object.prototype.hasOwnProperty.call(entries, 'ジャンル/サブジャンル')) {
-      genres = await Promise.all((await entries['ジャンル/サブジャンル'].$$('td:nth-child(2) > span > a')).map(async (element) => (await (await element.getProperty('innerText')).jsonValue()).trim()))
+      genres = await Promise.all((await entries['ジャンル/サブジャンル'].$$('td:nth-child(2) > span > a')).map(async (element) => (await (await element.getProperty('innerText')).jsonValue()).trim()));
     }
 
     let publishDate = '1970/01/01';

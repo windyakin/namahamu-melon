@@ -1,3 +1,14 @@
 {
-  "extends": "airbnb-base"
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended"
+  ],
+  "env": {
+    "node": true,
+    "browser": true,
+    "es2020": true
+  },
+  "rules": {
+    "semi": "error"
+  }
 }

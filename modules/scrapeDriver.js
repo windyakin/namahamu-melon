@@ -1,4 +1,4 @@
-const Puppeteer = require('puppeteer')
+const Puppeteer = require('puppeteer');
 
 module.exports = class ScrapeDriver {
   constructor() {
