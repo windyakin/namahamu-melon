@@ -2,12 +2,12 @@ version: '3'
 
 services:
   namahamu-melon:
-    image: namahamu-melon
+    image: ghcr.io/windyakin/namahamu-melon
     build: .
     cap_add:
       - SYS_ADMIN
     environment:
-      - CHROME_EXECUTE_PATH=google-chrome-unstable
+      - CHROME_EXECUTE_PATH=google-chrome-stable
   nginx:
     image: nginx:stable
     volumes:
