@@ -67,6 +67,7 @@ app.get('/tiger/:id', async (req, res) => {
     try {
       await scrapeDriver.close();
     } finally {
+      // eslint-disable-next-line no-process-exit
       process.exit();
     }
   });
