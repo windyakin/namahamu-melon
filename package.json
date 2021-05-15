@@ -15,15 +15,15 @@
     "node": ">= 12.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.25.0",
+    "eslint": "^7.26.0",
     "eslint-plugin-node": "^11.1.0",
     "nodemon": "^2.0.7"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
     "express": "^4.17.1",
-    "helmet": "^4.5.0",
+    "helmet": "^4.6.0",
     "morgan": "^1.10.0",
-    "puppeteer": "^5.5.0"
+    "puppeteer": "^9.1.1"
   }
 }
