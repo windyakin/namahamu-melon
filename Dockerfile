@@ -1,9 +1,5 @@
-FROM node:12-slim
-
-# NOTE: See https://crbug.com/795759
-RUN apt-get update \
-  && apt-get install -y libgconf-2-4 \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+FROM node:16-slim
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -15,7 +11,9 @@ RUN apt-get update \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
     google-chrome-stable \
+    libxss1 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+  && apt-get autoremove -y \
   && rm -rf /src/*.deb
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
@@ -25,6 +23,8 @@ RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
   && chown -R pptruser:pptruser /home/pptruser \
   && mkdir -p /usr/src/app \
   && chown -R pptruser:pptruser /usr/src/app
+
+ENV CHROME_EXECUTE_PATH=google-chrome-stable
 
 USER pptruser
 
