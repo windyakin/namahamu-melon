@@ -6,8 +6,6 @@ services:
     build: .
     cap_add:
       - SYS_ADMIN
-    environment:
-      - CHROME_EXECUTE_PATH=google-chrome-stable
   nginx:
     image: nginx:stable
     volumes:
