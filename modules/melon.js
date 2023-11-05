@@ -14,6 +14,8 @@ module.exports = class Melon {
   async scrapeNamahamuData(namahamuId) {
     const page = await this.getPage(namahamuId);
     try {
+      const titleElement = await page.$('h1.page-header');
+      const title = await (await titleElement.getProperty('innerText')).jsonValue();
       const rows = await this.constructor.getAttributesContent(page);
 
       const values = Object.fromEntries(
@@ -22,6 +24,7 @@ module.exports = class Melon {
           return object;
         })).filter((v) => v),
       );
+      values.bookTitle = title;
       return values;
     } finally {
       await page.close();
@@ -48,11 +51,6 @@ module.exports = class Melon {
   static async convertKeyValuePair(row) {
     const key = (await (await (await row.$('th')).getProperty('innerText')).jsonValue()).trim();
     switch (key) {
-      case 'タイトル':
-        return [
-          'bookTitle',
-          (await (await (await row.$('td')).getProperty('innerText')).jsonValue()).trim(),
-        ];
       case 'サークル名':
         return [
           'circleName',
@@ -93,21 +91,21 @@ module.exports = class Melon {
   }
 
   static async getAttributesContent(page) {
-    const description = await page.$('#description');
+    const description = await page.$('.table-wrapper');
     const table = await description.$('table');
     const rows = await table.$$('tr');
     return rows;
   }
 
   static async isUnderagePage(page) {
-    const popup = await page.$('.popup');
+    const popup = await page.$('.page-attention');
     return popup !== null;
   }
 
   static async throughUnderage(page) {
     await Promise.all([
       page.waitForNavigation(),
-      page.click('.f_left.yes'),
+      page.click('.general-btn'),
     ]);
   }
 
